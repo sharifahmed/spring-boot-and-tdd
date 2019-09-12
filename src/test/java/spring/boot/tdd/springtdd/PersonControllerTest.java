@@ -20,6 +20,8 @@ import spring.boot.tdd.springtdd.service.PersonService;
 import java.util.Arrays;
 import java.util.List;
 
+import static org.junit.Assert.assertEquals;
+
 @RunWith(value = SpringRunner.class)
 @WebMvcTest(controllers = PersonController.class)
 class PersonControllerTest {
@@ -30,7 +32,7 @@ class PersonControllerTest {
     @MockBean
     private PersonService personService;
 
-    private static final List<Person> mockPersons = Arrays.asList(
+    private List<Person> mockPersons = Arrays.asList(
             new Person(1, "Mohammad", "Ibrahim"),
             new Person(3, "Musa", "Ahmed"),
             new Person(5, "Sharif", "Ahmed"));
@@ -45,6 +47,23 @@ class PersonControllerTest {
         MvcResult result = mockMvc.perform(requestBuilder).andReturn();
 
         JSONAssert.assertEquals(getExpectedPersons(), result.getResponse().getContentAsString(), false);
+    }
+
+    @Test
+    public void addPerson() throws Exception {
+        Person mockPerson = new Person(7, "Mohammad", "Ali");
+
+        Mockito.when(personService.addPerson(Mockito.any(Person.class))).thenReturn(mockPerson);
+
+        MockHttpServletRequestBuilder requestBuilder = MockMvcRequestBuilders.post("/addPerson")
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON);
+
+        MvcResult result = mockMvc.perform(requestBuilder).andReturn();
+
+        String expected = "{id:7,firstName:Mohammad,lastName:Ali}";
+
+        assertEquals(expected, result.getResponse().getContentAsString());
     }
 
     private String getExpectedPersons() {
